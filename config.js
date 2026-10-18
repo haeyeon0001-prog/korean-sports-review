@@ -10,7 +10,7 @@ const APP_CONFIG = {
     "朗読": "物語の朗読"
   },
   "scoring": "words",
-  "cacheVersion": "20261018-3",
+  "cacheVersion": "20261018-4",
   "cast": [
     {
       "name": "유토",

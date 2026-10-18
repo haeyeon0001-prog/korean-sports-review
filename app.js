@@ -48,7 +48,22 @@ function renderLesson(l){
  renderBaseLesson(l);state.quiz??={};
  if(l.story){document.querySelector('.role-toolbar').hidden=true;document.querySelector('.steps li:last-child').hidden=true;document.querySelector('[data-act="repeat"]').textContent='▶ 一文ずつ（間あり）';}
  const part=document.querySelectorAll('.step')[1];part.querySelector('h2').textContent='語彙・文法を練習する';
- part.insertAdjacentHTML('beforeend',`${AUDIO.full[l.n]?'<div class="card"><p>語彙の音声</p><audio controls preload="none" src="audio/'+String(l.n).padStart(2,'0')+'/vocab.mp3"></audio><p>文型・表現の音声</p><audio controls preload="none" src="audio/'+String(l.n).padStart(2,'0')+'/grammar.mp3"></audio></div>':''}<div class="card practice"><h3>語彙を思い出す</h3><p>意味を見て、韓国語を書きましょう。</p><label class="toggle"><input type="checkbox" id="mistakesOnly">間違えた問題だけ</label>${l.vocab.map(([ko,ja],i)=>exercise(l,'v'+i,ja,ko)).join('')}<h3>文法を使う</h3>${l.mini.map(x=>`<details><summary>${esc(x.title)}</summary><p>${esc(x.body)}</p><p lang="ko">${esc(x.say[0])}</p><p>${esc(x.say[1])}</p></details>`).join('')}${l.grammar.map((x,i)=>exercise(l,'g'+i,x.q,x.a,x.type)).join('')}${l.terms?.length?'<h3>スポーツ専門語彙</h3><p>意味から韓国語を思い出しましょう。</p>'+l.terms.map(([ko,ja],i)=>exercise(l,'t'+i,ja,ko)).join(''):''}</div>`);
+ part.insertAdjacentHTML('beforeend',`${AUDIO.full[l.n]?'<div class="card"><p>語彙の音声</p><audio controls preload="none" src="audio/'+String(l.n).padStart(2,'0')+'/vocab.mp3"></audio></div>':''}<div class="card practice"><h3>語彙を思い出す</h3><p>意味を見て、韓国語を書きましょう。</p><label class="toggle"><input type="checkbox" id="mistakesOnly">間違えた問題だけ</label>${l.vocab.map(([ko,ja],i)=>exercise(l,'v'+i,ja,ko)).join('')}<h3>文法を使う</h3>${l.mini.map(x=>`<details><summary>${esc(x.title)}</summary><p>${esc(x.body)}</p><p lang="ko">${esc(x.say[0])}</p><p>${esc(x.say[1])}</p></details>`).join('')}${l.grammar.map((x,i)=>exercise(l,'g'+i,x.q,x.a,x.type)).join('')}${l.terms?.length?'<h3>スポーツ専門語彙</h3><p>意味から韓国語を思い出しましょう。</p>'+l.terms.map(([ko,ja],i)=>exercise(l,'t'+i,ja,ko)).join(''):''}</div>`);
+
+ const practice=part.querySelector('.practice');
+ const filter=practice.querySelector('label.toggle');if(filter)practice.prepend(filter);
+ let group=null;
+ for(const child of [...practice.children]){
+  if(child===filter)continue;
+  if(child.tagName==='H3'){group=document.createElement('details');group.className='practice-fold';const summary=document.createElement('summary');summary.textContent=child.textContent;group.append(summary);child.replaceWith(group);}
+  else if(group)group.append(child);
+ }
+ const vocab=part.querySelector('.card:has(table.vocab)');
+ if(vocab){const d=document.createElement('details');d.className='card practice-fold';const t=document.createElement('summary');t.textContent='語彙一覧';d.append(t);while(vocab.firstChild)d.append(vocab.firstChild);vocab.replaceWith(d);}
+ for(const section of [...document.querySelectorAll('section.step')]){
+  const d=document.createElement('details');d.className='step step-fold';const h=section.querySelector(':scope > header');const summary=document.createElement('summary');while(h.firstChild)summary.append(h.firstChild);h.remove();d.append(summary);while(section.firstChild)d.append(section.firstChild);section.replaceWith(d);
+ }
+ document.querySelector('.lhead').insertAdjacentHTML('beforeend','<p class="fold-hint">項目をタップして開きましょう。</p>');
 }
 function exercise(l,id,q,a,type='write'){
  const key=l.n+'-'+id,record=state.quiz[key]||{};let control='';
